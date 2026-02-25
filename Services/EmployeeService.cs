@@ -18,10 +18,6 @@ public class EmployeeService : IEmployeeService
         _context = context;
     }
 
-    /// <summary>
-    /// Retrieves an employee and all their subordinates (recursive) using a recursive CTE query.
-    /// This approach is efficient for large datasets with thousands of rows.
-    /// </summary>
     public async Task<Employee?> GetEmployeeWithSubordinatesAsync(int employeeId)
     {
         // Use raw SQL with recursive CTE to efficiently fetch the hierarchy
