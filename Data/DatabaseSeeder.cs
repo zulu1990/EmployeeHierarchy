@@ -31,11 +31,6 @@ public class DatabaseSeeder
         _context = context;
     }
 
-    /// <summary>
-    /// Seeds the database with a large number of randomly generated employees.
-    /// Creates a realistic organizational hierarchy with multiple levels.
-    /// </summary>
-    /// <param name="employeeCount">Number of employees to generate (default: 1000)</param>
     public async Task SeedAsync(int employeeCount = 1000)
     {
         if (_context.Employees.Any())
@@ -52,14 +47,7 @@ public class DatabaseSeeder
             _context.Employees.AddRange(employees);
             await _context.SaveChangesAsync();
 
-            Console.WriteLine($"✓ Database seeded successfully with {employeeCount} employees.");
-            Console.WriteLine($"  - Total records: {_context.Employees.Count()}");
-            Console.WriteLine($"  - CEO (no manager): {_context.Employees.Count(e => e.ManagerId == null)}");
-            Console.WriteLine($"  - Managers: {_context.Employees.Where(e => e.ManagerId != null).Distinct().Count()}");
-
-            // Calculate hierarchy depth
             var maxDepth = CalculateHierarchyDepth();
-            Console.WriteLine($"  - Hierarchy depth: {maxDepth} levels");
         }
         catch (Exception ex)
         {
@@ -67,15 +55,10 @@ public class DatabaseSeeder
             throw;
         }
     }
-
-    /// <summary>
-    /// Generates a list of random employees with a realistic hierarchical structure.
-    /// Creates multiple management chains and ensures the hierarchy is connected.
-    /// </summary>
     private List<Employee> GenerateEmployees(int count)
     {
         var employees = new List<Employee>();
-        var rng = new Random(42); // Use seed for reproducibility, change if you want different data each time
+        var rng = new Random(42);
 
         // Create CEO (ID 1, no manager)
         employees.Add(new Employee
@@ -91,11 +74,8 @@ public class DatabaseSeeder
 
         while (currentId <= count)
         {
-            // Randomly decide whether to create a manager or a regular employee
-            // 20% chance to create a new manager (creates deeper hierarchy)
             bool isNewManager = rng.NextDouble() < 0.2 && currentId <= count;
 
-            // Select a random manager from the pool
             int managerId = managersPool[rng.Next(managersPool.Count)];
 
             var employee = new Employee
@@ -107,7 +87,6 @@ public class DatabaseSeeder
 
             employees.Add(employee);
 
-            // If this new employee is a manager, add them to the pool
             if (isNewManager)
             {
                 managersPool.Add(currentId);
@@ -118,10 +97,6 @@ public class DatabaseSeeder
 
         return employees;
     }
-
-    /// <summary>
-    /// Generates a random employee name by combining first and last names.
-    /// </summary>
     private string GenerateRandomName()
     {
         string firstName = FirstNames[_random.Next(FirstNames.Length)];
@@ -129,9 +104,6 @@ public class DatabaseSeeder
         return $"{firstName} {lastName}";
     }
 
-    /// <summary>
-    /// Calculates the maximum depth of the organizational hierarchy.
-    /// </summary>
     private int CalculateHierarchyDepth()
     {
         var allEmployees = _context.Employees.ToList();
