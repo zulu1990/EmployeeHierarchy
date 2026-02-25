@@ -32,26 +32,13 @@ public class EmployeeService : IEmployeeService
                     FROM Employees e
                     INNER JOIN EmployeeHierarchy eh ON e.ManagerId = eh.Id
                 )
-                SELECT * FROM EmployeeHierarchy
+                SELECT DISTINCT * FROM EmployeeHierarchy
             ")
             .ToListAsync();
 
         if (employees.Count == 0)
             return null;
 
-        // Build the hierarchy structure
-        var employeeDict = employees.ToDictionary(e => e.Id);
-        foreach (var employee in employees)
-        {
-            if (employee.Id != employeeId && employee.ManagerId.HasValue)
-            {
-                if (employeeDict.TryGetValue(employee.ManagerId.Value, out var manager))
-                {
-                    manager.Subordinates.Add(employee);
-                }
-            }
-        }
-
-        return employeeDict[employeeId];
+        return employees.FirstOrDefault(e => e.Id == employeeId);
     }
 }
